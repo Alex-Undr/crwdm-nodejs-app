@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+    <%- include('./partials/head'); %>
+<body>
+    <div class="container">
+        <crowdin-h1>Login page</crowdin-h1>
+                <crowdin-input
+                        with-fixed-height
+                        label="Project ID"
+                        value=""
+                        name="project_id"
+                        onchange="onInputChange(this)"
+                        help-text-html="Enter your Project ID"
+                ></crowdin-input>
+                <crowdin-input
+                        with-fixed-height
+                        label="Personal Access Token"
+                        value=""
+                        name="personal_token"
+                        onchange="onInputChange(this)"
+                        help-text-html="Enter your Personal Access Token"
+                ></crowdin-input>
+            <br>
+            <div>
+                <crowdin-button primary onclick="login()">Sign in</crowdin-button>
+            </div>
+    </div>
+</body>
+    <script>
+        function login(){
+            const projectId = document.querySelector("crowdin-input[name=project_id]").value;
+            const personalToken = document.querySelector("crowdin-input[name=personal_token]").value;
+            const formData = {
+                projectId: projectId,
+                personalToken: personalToken
+            };
+
+            fetch('/api/login', {
+                method: "post",
+                body: JSON.stringify(formData),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then((response) => {
+                    if(response.status === 200) {
+                        return response.json();
+                    } else {
+                        return response.json();
+                    }
+                })
+                .then((data) => {
+                    try {
+                        if(data.personalToken && data.projectId) {
+                            window.sessionStorage.setItem('personalToken', data.personalToken);
+                            window.sessionStorage.setItem('projectId', data.projectId);
+                            window.location.href = "/";
+                        } else {
+                            console.log(data);
+                        }
+                    } catch(e) {
+                        console.log("cant parse json", e);
+                    }
+                });
+        }
+    </script>
+</html>
