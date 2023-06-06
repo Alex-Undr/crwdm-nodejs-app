@@ -9,14 +9,18 @@ class uploadFilesController {
                 token: personalToken,
             });
 
-            const { name, data, mimetype } = req.files.userfile;
+            try {
+                const { name, data, mimetype } = req.files.userfile;
 
-            const storage= await client.uploadStorageApi.addStorage(name, data, mimetype);
-            const file = await client.sourceFilesApi.createFile(projectId, { name, storageId: storage.data.id, directoryId: Number(selectedDir) })
+                const storage= await client.uploadStorageApi.addStorage(name, data, mimetype);
+                const file = await client.sourceFilesApi.createFile(projectId, { name, storageId: storage.data.id, directoryId: Number(selectedDir) })
 
-            res.status(200).json({
-                result: "file saved"
-            });
+                res.status(200).json({
+                    result: "file saved"
+                });
+            } catch (e) {
+                res.status(e.code).json({ error: e });
+            }
 
         }catch (e) {
             console.log(e);
