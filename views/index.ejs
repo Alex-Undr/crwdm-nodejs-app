@@ -12,12 +12,13 @@
         </div>
         <br>
         <div class="text-center">
-            <crowdin-button primary >Download selected files</crowdin-button>
+            <crowdin-button primary onclick="downloadFile()">Download selected file</crowdin-button>
         </div>
     </div>
 </body>
     <script type="text/javascript">
         let selectedDir;
+        let selectedFile;
         async function getDirSelected(){
             let crowdinFiles = document.querySelector("crowdin-files-component");
             await crowdinFiles.getSelected()
@@ -32,6 +33,22 @@
             .catch(e => {
                 console.log(e);
             })
+        }
+
+        async function getFileSelected(){
+            let crowdinFiles = document.querySelector("crowdin-files-component");
+            await crowdinFiles.getSelected()
+                .then(function (selected){
+                    selected.every(s => {
+                        if(s.node_type == "1") {
+                            selectedFile = s.id;
+                            return false;
+                        }
+                    })
+                })
+                .catch(e => {
+                    console.log(e);
+                })
         }
 
         const accountData = {
@@ -67,6 +84,35 @@
                     try {
                         if(data.result === "file saved") {
                             window.location.reload();
+                        }
+                    } catch(e) {
+                        console.log("cant parse json", e);
+                    }
+                });
+        }
+
+
+        async function downloadFile() {
+
+            await getFileSelected();
+
+            let formData = new FormData();
+
+            formData.append("projectId", accountData.projectId);
+            formData.append("personalToken", accountData.personalToken);
+            formData.append("selectedFile", selectedFile);
+
+            fetch('/api/dwnld-files', {
+                method: "post",
+                body: formData
+            })
+                .then((response) => {
+                    return response.json();
+                })
+                .then((data) => {
+                    try {
+                        if(data.url) {
+                            window.open(data.url);
                         }
                     } catch(e) {
                         console.log("cant parse json", e);
